@@ -58,3 +58,32 @@ app.post('/addUser', (req, res) => {
 app.listen(PORT, () => {
   console.log(`The Server is running unser ${PORT}!`);
 });
+
+// Database
+
+const MongoClient = require('mongodb').MongoClient;
+const uri =
+  'mongodb+srv://admin:Kvw2jIb2ogXAI3WV@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority';
+const client = new MongoClient(uri, { useNewUrlParser: true });
+client.connect(err => {
+  const collection = client.db('onlinestore').collection('products');
+  // perform actions on the collection object
+  collection.insertOne(
+    {
+      name: 'Mobile',
+      price: 123,
+      stock: 7
+    },
+    (req, res) => {
+      console.log('successfully Inserted');
+    }
+  );
+  console.log('Database Connected...');
+  client.close();
+});
+
+// admin
+// Kvw2jIb2ogXAI3WV
+/*
+mongodb + srv://admin:<password>@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority
+*/
