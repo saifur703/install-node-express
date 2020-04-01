@@ -1,8 +1,14 @@
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+
 const app = express();
+
 const PORT = 3000;
+
 app.use(cors());
+app.use(bodyParser.json());
+
 app.get('/', (req, res) => {
   const data = {
     title: 'Hello World',
@@ -36,6 +42,17 @@ app.get('/users/:id', (req, res) => {
   const name = users[userID];
 
   res.send({ userID, name });
+});
+
+// POST
+app.post('/addUser', (req, res) => {
+  console.log('Post Req Send.');
+  //console.log(req.body);
+
+  // Save to Database
+  const user = req.body;
+  // user.id = Math.round(Math.random() * 100);
+  res.send(user);
 });
 
 app.listen(PORT, () => {
