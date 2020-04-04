@@ -11,15 +11,23 @@ app.use(bodyParser.json());
 
 const dbUser = 'admin';
 const pass = 'Kvw2jIb2ogXAI3WV';
+// const uri =
+//   'mongodb://admin:Kvw2jIb2ogXAI3WV@cluster0-shard-00-00-9ktka.mongodb.net:27017,cluster0-shard-00-01-9ktka.mongodb.net:27017,cluster0-shard-00-02-9ktka.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
 const uri =
   'mongodb+srv://admin:Kvw2jIb2ogXAI3WV@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority';
-const client = new MongoClient(uri, { useNewUrlParser: true });
+
+// const uri =
+//   'mongodb://admin:Kvw2jIb2ogXAI3WV@cluster0-shard-00-00-9ktka.mongodb.net:27017,cluster0-shard-00-01-9ktka.mongodb.net:27017,cluster0-shard-00-02-9ktka.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 app.get('/', (req, res) => {
   const data = {
     title: 'Hello World',
     price: 250,
-    Name: 'Saifur Rahman'
+    Name: 'Saifur Rahman',
   };
   res.send(data);
 });
@@ -28,7 +36,7 @@ app.get('/fruits', (req, res) => {
   const fruits = {
     fruit: 'banana',
     quantity: 32,
-    price: '20 Taka Per piece.'
+    price: '20 Taka Per piece.',
   };
   res.send(fruits);
 });
@@ -40,7 +48,7 @@ const users = [
   'Rahima',
   'Sultana',
   'Tahmina',
-  'Morium'
+  'Morium',
 ];
 app.get('/users/:id', (req, res) => {
   const userID = req.params.id;
@@ -58,21 +66,27 @@ app.post('/addProduct', (req, res) => {
   // Save to Database
   const product = req.body;
   console.log(product);
-  res.send(product);
+  // res.send(product);
 
+  const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  //console.log(client);
   // Database
-  client.connect(err => {
+  client.connect((error) => {
     const collection = client.db('onlinestore').collection('products');
-    collection.insertOne(product, (req, result) => {
+    collection.insertOne(product, (err, result) => {
       if (err) {
         console.log(err);
         res.status(500).send({ message: err });
       } else {
-        console.log('successfully Inserted', result);
+        console.log('successfully Inserted');
         res.send(result.ops[0]);
+        // res.send(result);
       }
+      client.close();
     });
-    client.close();
   });
 });
 
