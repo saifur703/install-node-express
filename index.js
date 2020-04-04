@@ -1,13 +1,19 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const MongoClient = require('mongodb').MongoClient;
 
 const app = express();
-
 const PORT = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
+
+const dbUser = 'admin';
+const pass = 'Kvw2jIb2ogXAI3WV';
+const uri =
+  'mongodb+srv://admin:Kvw2jIb2ogXAI3WV@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority';
+const client = new MongoClient(uri, { useNewUrlParser: true });
 
 app.get('/', (req, res) => {
   const data = {
@@ -45,45 +51,35 @@ app.get('/users/:id', (req, res) => {
 });
 
 // POST
-app.post('/addUser', (req, res) => {
+app.post('/addProduct', (req, res) => {
   console.log('Post Req Send.');
   //console.log(req.body);
 
   // Save to Database
-  const user = req.body;
-  // user.id = Math.round(Math.random() * 100);
-  res.send(user);
+  const product = req.body;
+  console.log(product);
+  res.send(product);
+
+  // Database
+  client.connect(err => {
+    const collection = client.db('onlinestore').collection('products');
+    collection.insertOne(product, (req, result) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        console.log('successfully Inserted', result);
+        res.send(result.ops[0]);
+      }
+    });
+    client.close();
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`The Server is running unser ${PORT}!`);
+  console.log(`The Server is running under ${PORT}!`);
 });
 
-// Database
-
-const MongoClient = require('mongodb').MongoClient;
-const uri =
-  'mongodb+srv://admin:Kvw2jIb2ogXAI3WV@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority';
-const client = new MongoClient(uri, { useNewUrlParser: true });
-client.connect(err => {
-  const collection = client.db('onlinestore').collection('products');
-  // perform actions on the collection object
-  collection.insertOne(
-    {
-      name: 'Mobile',
-      price: 123,
-      stock: 7
-    },
-    (req, res) => {
-      console.log('successfully Inserted');
-    }
-  );
-  console.log('Database Connected...');
-  client.close();
-});
-
-// admin
-// Kvw2jIb2ogXAI3WV
 /*
 mongodb + srv://admin:<password>@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority
 */
