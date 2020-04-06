@@ -2,34 +2,46 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
+require('dotenv').config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
-const dbUser = 'admin';
-const pass = 'Kvw2jIb2ogXAI3WV';
-// const uri =
-//   'mongodb://admin:Kvw2jIb2ogXAI3WV@cluster0-shard-00-00-9ktka.mongodb.net:27017,cluster0-shard-00-01-9ktka.mongodb.net:27017,cluster0-shard-00-02-9ktka.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
-const uri =
-  'mongodb+srv://admin:Kvw2jIb2ogXAI3WV@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority';
+const dbUser = process.env.DB_USER;
+const dbPass = process.env.DB_PASS;
+const uri = `mongodb+srv://${dbUser}:${dbPass}@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority`;
 
-// const uri =
-//   'mongodb://admin:Kvw2jIb2ogXAI3WV@cluster0-shard-00-00-9ktka.mongodb.net:27017,cluster0-shard-00-01-9ktka.mongodb.net:27017,cluster0-shard-00-02-9ktka.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
-const client = new MongoClient(uri, {
+let client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-app.get('/', (req, res) => {
-  const data = {
-    title: 'Hello World',
-    price: 250,
-    Name: 'Saifur Rahman',
-  };
-  res.send(data);
+app.get('/products', (req, res) => {
+  client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  // Database
+  client.connect((error) => {
+    const collection = client.db('onlinestore').collection('products');
+    collection
+      .find()
+      .limit(5)
+      .toArray((err, documents) => {
+        if (err) {
+          console.log(err);
+          res.status(500).send({ message: err });
+        } else {
+          console.log('successfully Inserted');
+          res.send(documents);
+          // res.send(result);
+        }
+        client.close();
+      });
+  });
 });
 
 app.get('/fruits', (req, res) => {
@@ -93,7 +105,3 @@ app.post('/addProduct', (req, res) => {
 app.listen(PORT, () => {
   console.log(`The Server is running under ${PORT}!`);
 });
-
-/*
-mongodb + srv://admin:<password>@cluster0-9ktka.mongodb.net/test?retryWrites=true&w=majority
-*/

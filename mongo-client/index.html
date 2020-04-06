@@ -1,85 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mongo DB Client</title>
 
-    <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mongo DB Client</title>
 
-  <body>
-    <div class="container">
-      <h1>My Nodejs and MongoDB</h1>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex laudantium
-        nulla iure dolores possimus, cum tempora exercitationem quasi ducimus
-        quam placeat omnis fugit minima. Deleniti, quo autem? Dolores, earum
-        dolorem!
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>My Nodejs and MongoDB</h1>
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex laudantium
+      nulla iure dolores possimus, cum tempora exercitationem quasi ducimus
+      quam placeat omnis fugit minima. Deleniti, quo autem? Dolores, earum
+      dolorem!
+    </p>
+
+    <ul id="productList">
+      <!-- <li id="userName">Saifur Rahman</li> -->
+    </ul>
+
+    <div class="row">
+      <input type="text" id="user" class="form-control" placeholder="Name" />
+      <input type="text" id="price" class="form-control" placeholder="Price" />
+      <input type="text" id="stock" class="form-control" placeholder="Stock" />
+      <input type="submit" value="Add Product" id="addProduct" class="btn btn-primary" />
+
+
+      <br />
+      <p></p>
+      <p style="color: green; display: none;" id="successMsg">
+        <small>The Product is Added Successfully.</small>
       </p>
-
-      <ul id="userwrap">
-        <li id="userName"></li>
-      </ul>
-
-      <div class="row">
-        <input type="text" id="user" class="form-control" placeholder="Name" />
-        <input
-          type="text"
-          id="price"
-          class="form-control"
-          placeholder="Price"
-        />
-        <input
-          type="text"
-          id="stock"
-          class="form-control"
-          placeholder="Stock"
-        />
-        <input
-          type="submit"
-          value="Add Product"
-          id="addProduct"
-          class="btn btn-primary"
-        />
-        <br />
-        <p></p>
-        <p style="color: green; display: none;" id="successMsg">
-          <small>The Product is Added Successfully.</small>
-        </p>
-      </div>
     </div>
+  </div>
 
-    <script type="text/javascript">
-      fetch('http://localhost:3000/users/1')
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          document.getElementById('userName').innerText = data.name;
-          //   document.getElementById('userName').innerText = data.name;
-        });
+  <script type="text/javascript">
+    // get data
+    fetch('http://localhost:3000/products')
+      .then((res) => res.json())
+      .then((data) => {
+        displayProducts(data);
 
-      //  Post data to the server
-      const addProduct = document.getElementById('addProduct');
-      addProduct.addEventListener('click', () => {
-        const name = document.getElementById('user').value;
-        const price = document.getElementById('price').value;
-        const stock = document.getElementById('stock').value;
+        document.getElementById('userName').innerText = data.name;
+        //   document.getElementById('userName').innerText = data.name;
+      });
 
-        const product = {
-          name,
-          price,
-          stock,
-        };
-        console.log(product);
+    // Display Products 
+    function displayProducts(data) {
+      const productContainer = document.getElementById("productList");
+      for (let i = 0; i < data.length; i++) {
+        const product = data[i];
+        appendProduct(product, productContainer);
+      }
+    }
+    // Append Product 
+    function appendProduct(product, productContainer) {
+      item = document.createElement("li");
+      item.innerText = `Product: ${product.name} Price: ${product.price} Stock: ${product.stock}`
+      productContainer.appendChild(item);
+    }
 
-        // POST
-        fetch('http://localhost:3000/addProduct', {
+    //  Post data to the server
+    const addProduct = document.getElementById('addProduct');
+    addProduct.addEventListener('click', () => {
+      const name = document.getElementById('user').value;
+      const price = document.getElementById('price').value;
+      const stock = document.getElementById('stock').value;
+
+      const product = {
+        name,
+        price,
+        stock,
+      };
+      console.log(product);
+
+      // POST
+      fetch('http://localhost:3000/addProduct', {
           method: 'POST',
           body: JSON.stringify(product),
 
@@ -90,47 +91,48 @@
           //   contentType: 'application/json; charset=utf-8',
           // },
         })
-          .then((res) => res.json())
-          .then((data) => {
-            updateProduct(data),
-              // Clean input value
-              (document.getElementById('user').value = '');
-            document.getElementById('price').value = '';
-            document.getElementById('stock').value = '';
+        .then((res) => res.json())
+        .then((data) => {
+          updateProduct(data),
+            // Clean input value
+            (document.getElementById('user').value = '');
+          document.getElementById('price').value = '';
+          document.getElementById('stock').value = '';
 
-            // show success message
-            const successMsg = document.getElementById('successMsg');
-            successMsg.style.display = 'block';
-            setTimeout(() => {
-              successMsg.style.display = 'none';
-            }, 5000);
-          });
-      });
+          // show success message
+          const successMsg = document.getElementById('successMsg');
+          successMsg.style.display = 'block';
+          setTimeout(() => {
+            successMsg.style.display = 'none';
+          }, 5000);
+        });
+    });
 
-      function updateProduct(user) {
-        const parentEl = document.getElementById('userwrap');
-        const newUser = document.createElement('li');
-        const input = document.getElementById('user');
-        const inputPrice = document.getElementById('price');
-        const inputStock = document.getElementById('stock');
+    function updateProduct(user) {
+      const parentEl = document.getElementById('productList');
+      const newUser = document.createElement('li');
+      const input = document.getElementById('user');
+      const inputPrice = document.getElementById('price');
+      const inputStock = document.getElementById('stock');
 
-        const multiValue =
-          'Name: ' +
-          user.name +
-          ' Price: ' +
-          user.price +
-          ' Stock: ' +
-          user.stock;
+      const multiValue =
+        'Name: ' +
+        user.name +
+        ' Price: ' +
+        user.price +
+        ' Stock: ' +
+        user.stock;
 
-        newUser.innerText = multiValue;
-        console.log(multiValue);
-        parentEl.appendChild(newUser);
+      newUser.innerText = multiValue;
+      console.log(multiValue);
+      parentEl.appendChild(newUser);
 
-        // Reset Value
-        // input.value = '';
-        // inputPrice.value = '';
-        // inputStock.value = '';
-      }
-    </script>
-  </body>
+      // Reset Value
+      // input.value = '';
+      // inputPrice.value = '';
+      // inputStock.value = '';
+    }
+  </script>
+</body>
+
 </html>
