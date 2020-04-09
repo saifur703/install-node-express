@@ -5,7 +5,7 @@ const MongoClient = require('mongodb').MongoClient;
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4200;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -27,20 +27,17 @@ app.get('/products', (req, res) => {
   // Database
   client.connect((error) => {
     const collection = client.db('onlinestore').collection('products');
-    collection
-      .find()
-      .limit(5)
-      .toArray((err, documents) => {
-        if (err) {
-          console.log(err);
-          res.status(500).send({ message: err });
-        } else {
-          console.log('successfully Inserted');
-          res.send(documents);
-          // res.send(result);
-        }
-        client.close();
-      });
+    collection.find().toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        console.log('successfully Inserted');
+        res.send(documents);
+        // res.send(result);
+      }
+      client.close();
+    });
   });
 });
 
@@ -62,13 +59,48 @@ const users = [
   'Tahmina',
   'Morium',
 ];
+app.get('/product/:key', (req, res) => {
+  const key = req.params.key;
+  // Database
+  client.connect((error) => {
+    const collection = client.db('onlinestore').collection('products');
+    collection.find({ key }).toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(documents[0]);
+      }
+      client.close();
+    });
+  });
+});
+
+app.post('/getProductsByKey/:key', (req, res) => {
+  const key = req.params.key;
+  const productKeys = req.body;
+  // Database
+  client.connect((error) => {
+    const collection = client.db('onlinestore').collection('products');
+    collection.find({ key: { $in: productKeys } }).toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(documents);
+      }
+      client.close();
+    });
+  });
+});
+/* 
 app.get('/users/:id', (req, res) => {
   const userID = req.params.id;
   console.log(req.query.sort);
   const name = users[userID];
 
   res.send({ userID, name });
-});
+}); */
 
 // POST
 app.post('/addProduct', (req, res) => {
@@ -88,7 +120,7 @@ app.post('/addProduct', (req, res) => {
   // Database
   client.connect((error) => {
     const collection = client.db('onlinestore').collection('products');
-    collection.insertOne(product, (err, result) => {
+    collection.insertMany(product, (err, result) => {
       if (err) {
         console.log(err);
         res.status(500).send({ message: err });
